@@ -8,9 +8,8 @@
                 <div class="col p-4 d-flex flex-column position-static">
                     <strong class=" mb-2 text-danger" th:text="#{label.unProcessed}"
                             th:style="${appRequest.handled==true? 'display:none': 'display: inline-block!important'}"></strong>
-                    <h4 class="mb-2" th:text=" #{label.applicationFrom} +' '+ ${appRequest.getUser_name()}"></h4>
-                    <div class="mb-0 text-body-secondary"
-                         th:text="#{label.course}+' '+ ${appRequest.getCourse_name()}"></div>
+                    <h4 class="mb-2" th:text="#{label.applicationFrom} +' '+ ${appRequest.getUser_name()}"></h4>
+                    <div class="mb-0 text-body-secondary" th:text="#{label.course}+' '+ ${appRequest.getCourse_name()}"></div>
                     <p class="card-text mb-2" th:text="${appRequest.getCommentary()}"></p>
                     <span th:text="'Тел: ' + ${appRequest.getPhone()}"></span>
                     <a th:href="@{'/details/'+ ${appRequest.getId()}}" class="stretched-link"

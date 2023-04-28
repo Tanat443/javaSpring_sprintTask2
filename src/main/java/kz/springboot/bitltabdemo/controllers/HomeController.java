@@ -1,48 +1,81 @@
 package kz.springboot.bitltabdemo.controllers;
 
-import kz.springboot.bitltabdemo.db.DBUtil;
-import kz.springboot.bitltabdemo.models.Student;
+import kz.springboot.bitltabdemo.entities.ApplicationRequest;
+import kz.springboot.bitltabdemo.services.ApplicationRequestService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
+import java.util.List;
 
 
 @Controller
 public class HomeController {
+
+    @Autowired
+    private ApplicationRequestService applicationRequestService;
+
     @GetMapping(value = "/")
     public String homePage(Model model) {
-        ArrayList<Student> students = DBUtil.getItems();
-        model.addAttribute("students", students);
+        List<ApplicationRequest> appRequests = applicationRequestService.getAllAppRequests();
+        model.addAttribute("appRequests", appRequests);
         return "home";
     }
 
-    @GetMapping(value = "/addStudent")
-    public String AddStudentPage() {
-        return "addStudent";
+    @GetMapping(value = "/processedAppRequest")
+    public String processedAppRequest(Model model) {
+        List<ApplicationRequest> appRequests = applicationRequestService.getProcessedAppRequests();
+        model.addAttribute("appRequests", appRequests);
+        return "processed";
     }
 
-    @PostMapping(value = "/addStudent")
-    public String addStudent(@RequestParam(name = "studentName", defaultValue = "No name") String name,
-                             @RequestParam(name = "studentSurname", defaultValue = "No surname") String surname,
-                             @RequestParam(name = "studentExam", defaultValue = "0") int exam) {
-        String mark = "";
-        if (exam > 0) {
-            if (exam >= 50 && exam <= 59) {
-                mark = "D";
-            } else if (exam >= 60 && exam <= 74) {
-                mark = "C";
-            } else if (exam >= 75 && exam <= 89) {
-                mark = "B";
-            } else if (exam >= 90) {
-                mark = "A";
-            }
-            mark = "F";
+    @GetMapping(value = "/unProcessedAppRequest")
+    public String unProcessedAppRequest(Model model) {
+        List<ApplicationRequest> appRequests = applicationRequestService.getUnProcessedAppRequests();
+        model.addAttribute("appRequests", appRequests);
+        return "processed";
+    }
+
+    @GetMapping(value = "/addAppRequest")
+    public String AddApplicationRequestPage() {
+        return "addItem";
+    }
+
+
+    @PostMapping(value = "/addAppRequest")
+    public String AddApplicationRequest(ApplicationRequest applicationRequest) {
+        applicationRequestService.addAppRequest(applicationRequest);
+        return "redirect:/";
+    }
+
+    @GetMapping(value = "/details/{id}")
+    public String detailsPage(Model model, @PathVariable(name = "id") Long id) {
+        ApplicationRequest appRequest = applicationRequestService.getAppRequest(id);
+        model.addAttribute("appRequest", appRequest);
+        return "details";
+    }
+
+    @PostMapping(value = "/processApp")
+    public String processApp(@RequestParam(name = "id", defaultValue = "0") Long id) {
+        ApplicationRequest item = applicationRequestService.getAppRequest(id);
+        if (item != null) {
+            item.setHandled(true);
+            applicationRequestService.updateAppRequest(item);
         }
-        DBUtil.addItem(new Student(null, name, surname, exam, mark));
+        return "redirect:/";
+    }
+
+    @PostMapping(value = "/deleteAppRequest")
+    public String deleteItem(@RequestParam(name = "id", defaultValue = "0") Long id) {
+        ApplicationRequest appRequest = applicationRequestService.getAppRequest(id);
+
+        if (appRequest != null) {
+            applicationRequestService.deleteAppRequest(appRequest.getId());
+        }
         return "redirect:/";
     }
 }
